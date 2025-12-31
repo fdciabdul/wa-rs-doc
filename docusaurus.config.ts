@@ -12,7 +12,7 @@ const config: Config = {
   },
 
   url: 'https://fdciabdul.github.io',
-  baseUrl: '/wa-rs/',
+  baseUrl: '/',
 
   organizationName: 'fdciabdul',
   projectName: 'wa-rs',
