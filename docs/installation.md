@@ -130,9 +130,12 @@ cargo run
 
 ```bash
 # Health check
-curl http://localhost:3000/health
+curl http://localhost:3451/health
 # Should return: OK
 
+# Check Dashboard
+open http://localhost:3451/dashboard
+
 # Check Swagger UI
-open http://localhost:3000/swagger-ui
+open http://localhost:3451/swagger-ui
 ```

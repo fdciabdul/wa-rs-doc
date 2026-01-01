@@ -25,7 +25,7 @@ Include the token in the `Authorization` header with the `Bearer` prefix:
 
 ```bash
 curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:3000/api/v1/sessions
+  http://localhost:3451/api/v1/sessions
 ```
 
 ## Request Examples
@@ -35,7 +35,7 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 ```bash
 curl -X GET \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
-  http://localhost:3000/api/v1/sessions
+  http://localhost:3451/api/v1/sessions
 ```
 
 ### Create Session
@@ -45,7 +45,7 @@ curl -X POST \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"id": "my-session", "name": "My Account"}' \
-  http://localhost:3000/api/v1/sessions
+  http://localhost:3451/api/v1/sessions
 ```
 
 ## Error Responses
@@ -111,6 +111,24 @@ The JWT token contains:
 | `exp` | Expiration timestamp |
 | `iat` | Issued at timestamp |
 
+## Using Swagger UI
+
+To authenticate API requests in Swagger UI:
+
+1. Open Swagger UI at `http://localhost:3451/swagger-ui`
+2. Click the **"Authorize"** button (lock icon) at the top right
+3. In the dialog, enter your token in this format:
+   ```
+   Bearer YOUR_JWT_TOKEN
+   ```
+4. Click **"Authorize"** then **"Close"**
+5. All API requests will now include your token
+
+Example value to enter:
+```
+Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+```
+
 ## Public Endpoints
 
 These endpoints don't require authentication:
@@ -118,5 +136,20 @@ These endpoints don't require authentication:
 | Endpoint | Description |
 |----------|-------------|
 | `GET /health` | Health check |
+| `GET /dashboard/*` | Web Dashboard |
 | `GET /swagger-ui/*` | Swagger UI |
 | `GET /api-docs/*` | OpenAPI spec |
+
+## Dashboard Access
+
+The web dashboard at `/dashboard` doesn't require JWT authentication. You can access it directly at:
+
+```
+http://localhost:3451/dashboard
+```
+
+The dashboard provides a user-friendly interface to:
+- View and manage sessions
+- Create new sessions with QR code or pair code
+- Configure webhooks
+- View JWT token in settings

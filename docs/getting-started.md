@@ -56,9 +56,10 @@ After starting the server:
 
 | Endpoint | Description |
 |----------|-------------|
-| http://localhost:3000 | API Base URL |
-| http://localhost:3000/swagger-ui | Swagger UI Documentation |
-| http://localhost:3000/health | Health Check |
+| http://localhost:3451 | API Base URL |
+| http://localhost:3451/dashboard | Web Dashboard |
+| http://localhost:3451/swagger-ui | Swagger UI Documentation |
+| http://localhost:3451/health | Health Check |
 
 ## Next Steps
 

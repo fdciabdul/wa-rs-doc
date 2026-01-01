@@ -58,7 +58,7 @@ POST /api/v1/sessions
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/sessions \
+curl -X POST http://localhost:3451/api/v1/sessions \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
