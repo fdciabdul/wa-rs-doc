@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'WA-RS',
   tagline: 'WhatsApp REST API Gateway built with Rust',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/logo.png',
 
   future: {
     v4: true,
@@ -48,6 +48,10 @@ const config: Config = {
     },
     navbar: {
       title: 'WA-RS',
+      logo: {
+        alt: 'WA-RS Logo',
+        src: 'img/logo.png',
+      },
       items: [
         {
           type: 'docSidebar',
