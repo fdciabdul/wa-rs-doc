@@ -31,6 +31,48 @@ POST /api/v1/sessions/{session_id}/presence/set
 
 ---
 
+## Subscribe to Presence
+
+Subscribe to a contact's presence updates to receive online/offline notifications.
+
+```
+POST /api/v1/sessions/{session_id}/presence/subscribe
+```
+
+### Request Body
+
+```json
+{
+  "jid": "628123456789@s.whatsapp.net"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "Subscribed to presence updates for 628123456789@s.whatsapp.net"
+}
+```
+
+### Example
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/presence/subscribe \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jid": "628123456789@s.whatsapp.net"
+  }'
+```
+
+:::note
+Presence updates will be delivered via webhooks when the contact comes online or goes offline.
+:::
+
+---
+
 ## Send Chat State
 
 Send typing or recording indicator.

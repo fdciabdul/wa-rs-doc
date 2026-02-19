@@ -251,6 +251,104 @@ To remove reaction, send empty emoji:
 
 ---
 
+## Revoke Message
+
+Delete a message for everyone in the chat.
+
+```
+POST /api/v1/sessions/{session_id}/messages/revoke
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "message_id": "3EB0ABC123..."
+}
+```
+
+To revoke another user's message as a group admin:
+
+```json
+{
+  "to": "123456789-1234567890@g.us",
+  "message_id": "3EB0ABC123...",
+  "original_sender": "628987654321@s.whatsapp.net"
+}
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+### Example
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/revoke \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "628123456789@s.whatsapp.net",
+    "message_id": "3EB0ABC123..."
+  }'
+```
+
+---
+
+## Mark as Read
+
+Send read receipts for messages.
+
+```
+POST /api/v1/sessions/{session_id}/messages/read
+```
+
+### Request Body
+
+```json
+{
+  "chat_jid": "628123456789@s.whatsapp.net",
+  "message_ids": ["3EB0ABC123...", "3EB0DEF456..."]
+}
+```
+
+For group messages, include the sender:
+
+```json
+{
+  "chat_jid": "123456789-1234567890@g.us",
+  "sender": "628987654321@s.whatsapp.net",
+  "message_ids": ["3EB0ABC123..."]
+}
+```
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+### Example
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/read \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chat_jid": "628123456789@s.whatsapp.net",
+    "message_ids": ["3EB0ABC123..."]
+  }'
+```
+
+---
+
 ## Media Data Format
 
 All media endpoints accept either URL or base64:
