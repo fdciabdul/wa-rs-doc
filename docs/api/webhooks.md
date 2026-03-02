@@ -81,6 +81,8 @@ DELETE /api/v1/sessions/{session_id}/webhooks/{webhook_id}
 
 ## Event Types
 
+### Core Events
+
 | Event | Description |
 |-------|-------------|
 | `all` | Subscribe to all events |
@@ -88,13 +90,46 @@ DELETE /api/v1/sessions/{session_id}/webhooks/{webhook_id}
 | `receipt` | Message receipt (delivered, read) |
 | `presence` | Contact online/offline status |
 | `chat_presence` | Typing indicator |
-| `group_update` | Group info changed |
-| `joined_group` | Joined a new group |
-| `qr_code` | QR code generated |
-| `pair_code` | Pair code generated |
 | `connected` | Connected to WhatsApp |
 | `disconnected` | Disconnected from WhatsApp |
 | `logged_out` | Logged out from WhatsApp |
+| `qr_code` | QR code generated |
+| `pair_code` | Pair code generated |
+
+### Group Events
+
+| Event | Description |
+|-------|-------------|
+| `group_update` | Group info changed |
+| `joined_group` | Joined a new group |
+
+### Contact & Profile Events
+
+| Event | Description |
+|-------|-------------|
+| `picture_update` | Profile picture changed |
+| `user_about_update` | User about/status text changed |
+| `push_name_update` | Display name changed |
+| `contact_update` | Contact information updated |
+| `device_list_update` | Linked devices changed |
+
+### Chat Events
+
+| Event | Description |
+|-------|-------------|
+| `pin_update` | Message pinned or unpinned |
+| `mute_update` | Chat muted or unmuted |
+| `archive_update` | Chat archived or unarchived |
+| `mark_chat_as_read` | Chat marked as read |
+
+### System Events
+
+| Event | Description |
+|-------|-------------|
+| `undecryptable_message` | Received a message that could not be decrypted |
+| `client_outdated` | Client version is outdated |
+| `offline_sync_preview` | Preview of offline messages available |
+| `offline_sync_completed` | Offline message sync completed |
 
 ---
 
@@ -137,6 +172,34 @@ All webhook payloads follow this format:
   "event": "connected",
   "timestamp": 1767143203,
   "data": {}
+}
+```
+
+### Picture Update Event
+
+```json
+{
+  "session_id": "my-session",
+  "event": "picture_update",
+  "timestamp": 1767143203,
+  "data": {
+    "jid": "628123456789@s.whatsapp.net",
+    "action": "set"
+  }
+}
+```
+
+### Pin Update Event
+
+```json
+{
+  "session_id": "my-session",
+  "event": "pin_update",
+  "timestamp": 1767143203,
+  "data": {
+    "chat_jid": "628123456789@s.whatsapp.net",
+    "pinned": true
+  }
 }
 ```
 

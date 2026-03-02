@@ -109,9 +109,20 @@ POST /api/v1/sessions/{session_id}/groups
   "participants": [
     "628123456789@s.whatsapp.net",
     "628987654321@s.whatsapp.net"
-  ]
+  ],
+  "membership_approval_mode": "off",
+  "member_add_mode": "all_member_add",
+  "member_link_mode": "admin_link"
 }
 ```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | Yes | Group name |
+| `participants` | array | Yes | List of participant JIDs |
+| `membership_approval_mode` | string | No | `off` or `on` (join request approval) |
+| `member_add_mode` | string | No | `admin_add` or `all_member_add` |
+| `member_link_mode` | string | No | `admin_link` or `all_member_link` |
 
 ### Response
 
@@ -124,7 +135,7 @@ POST /api/v1/sessions/{session_id}/groups
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/sessions/my-session/groups \
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/groups \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -190,6 +201,54 @@ To delete the description, set `description` to `null`.
 
 ---
 
+## Set Group Settings
+
+Update advanced group settings.
+
+```
+PUT /api/v1/sessions/{session_id}/groups/{group_jid}/settings
+```
+
+### Request Body
+
+```json
+{
+  "membership_approval_mode": "on",
+  "member_add_mode": "admin_add",
+  "member_link_mode": "admin_link"
+}
+```
+
+All fields are optional. Only provided fields will be updated.
+
+| Field | Type | Values | Description |
+|-------|------|--------|-------------|
+| `membership_approval_mode` | string | `off`, `on` | Whether join requests require admin approval |
+| `member_add_mode` | string | `admin_add`, `all_member_add` | Who can add new participants |
+| `member_link_mode` | string | `admin_link`, `all_member_link` | Who can edit the group invite link |
+
+### Response
+
+```json
+{
+  "success": true
+}
+```
+
+### Example
+
+```bash
+curl -X PUT http://localhost:3451/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/settings \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "membership_approval_mode": "on",
+    "member_add_mode": "admin_add"
+  }'
+```
+
+---
+
 ## Leave Group
 
 Leave a group.
@@ -209,7 +268,7 @@ POST /api/v1/sessions/{session_id}/groups/{group_jid}/leave
 ### Example
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/leave \
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/leave \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -364,11 +423,11 @@ GET /api/v1/sessions/{session_id}/groups/{group_jid}/invite-link
 
 ```bash
 # Get current invite link
-curl http://localhost:3000/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/invite-link \
+curl http://localhost:3451/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/invite-link \
   -H "Authorization: Bearer YOUR_TOKEN"
 
 # Reset and get new invite link
-curl "http://localhost:3000/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/invite-link?reset=true" \
+curl "http://localhost:3451/api/v1/sessions/my-session/groups/123456789-1234567890@g.us/invite-link?reset=true" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
@@ -379,7 +438,7 @@ curl "http://localhost:3000/api/v1/sessions/my-session/groups/123456789-12345678
 Use the same message endpoints with group JID:
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/sessions/my-session/messages/text \
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/text \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{

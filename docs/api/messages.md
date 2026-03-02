@@ -26,7 +26,8 @@ POST /api/v1/sessions/{session_id}/messages/text
 ```json
 {
   "message_id": "3EB0ABC123...",
-  "status": "sent"
+  "timestamp": 1700000000,
+  "to": "628123456789@s.whatsapp.net"
 }
 ```
 
@@ -55,7 +56,7 @@ POST /api/v1/sessions/{session_id}/messages/image
 ```json
 {
   "to": "628123456789",
-  "media": {
+  "image": {
     "url": "https://example.com/image.jpg"
   },
   "caption": "Check this out!"
@@ -67,8 +68,8 @@ Or with base64:
 ```json
 {
   "to": "628123456789",
-  "media": {
-    "base64": "/9j/4AAQSkZJRg...",
+  "image": {
+    "data": "/9j/4AAQSkZJRg...",
     "mimetype": "image/jpeg"
   },
   "caption": "Check this out!"
@@ -88,7 +89,7 @@ POST /api/v1/sessions/{session_id}/messages/video
 ```json
 {
   "to": "628123456789",
-  "media": {
+  "video": {
     "url": "https://example.com/video.mp4"
   },
   "caption": "Watch this!"
@@ -108,7 +109,7 @@ POST /api/v1/sessions/{session_id}/messages/audio
 ```json
 {
   "to": "628123456789",
-  "media": {
+  "audio": {
     "url": "https://example.com/audio.mp3"
   },
   "ptt": true
@@ -132,7 +133,7 @@ POST /api/v1/sessions/{session_id}/messages/document
 ```json
 {
   "to": "628123456789",
-  "media": {
+  "document": {
     "url": "https://example.com/document.pdf"
   },
   "filename": "report.pdf"
@@ -152,7 +153,7 @@ POST /api/v1/sessions/{session_id}/messages/sticker
 ```json
 {
   "to": "628123456789",
-  "media": {
+  "sticker": {
     "url": "https://example.com/sticker.webp"
   }
 }
@@ -192,16 +193,421 @@ POST /api/v1/sessions/{session_id}/messages/contact
 {
   "to": "628123456789",
   "contact": {
-    "name": "John Doe",
+    "display_name": "John Doe",
     "phones": [
       {
-        "phone": "+628123456789",
-        "type": "CELL"
+        "number": "+628123456789",
+        "phone_type": "CELL"
       }
     ]
   }
 }
 ```
+
+---
+
+## Send Poll
+
+Create a poll with multiple options.
+
+```
+POST /api/v1/sessions/{session_id}/messages/poll
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "name": "What's your favorite color?",
+  "options": ["Red", "Blue", "Green", "Yellow"],
+  "selectable_count": 1
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `name` | string | Yes | Poll question |
+| `options` | array | Yes | List of poll options |
+| `selectable_count` | number | No | Max selectable options (0 = unlimited) |
+| `reply_to` | string | No | Message ID to reply to |
+
+### Example
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/poll \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "628123456789",
+    "name": "What is your favorite color?",
+    "options": ["Red", "Blue", "Green"],
+    "selectable_count": 1
+  }'
+```
+
+---
+
+## Send Buttons
+
+Send a message with interactive buttons.
+
+```
+POST /api/v1/sessions/{session_id}/messages/buttons
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "content_text": "Please choose an option",
+  "footer": "Powered by WA-RS",
+  "buttons": [
+    {
+      "button_id": "btn_1",
+      "display_text": "Option 1"
+    },
+    {
+      "button_id": "btn_2",
+      "display_text": "Option 2"
+    }
+  ],
+  "header_text": "Main Menu"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `content_text` | string | Yes | Body text |
+| `footer` | string | No | Footer text |
+| `buttons` | array | Yes | List of buttons (max 3) |
+| `header_text` | string | No | Header text |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send List
+
+Send a message with a selectable list menu.
+
+```
+POST /api/v1/sessions/{session_id}/messages/list
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "title": "Main Menu",
+  "description": "Please select an option",
+  "button_text": "View Options",
+  "sections": [
+    {
+      "title": "Category 1",
+      "rows": [
+        {
+          "row_id": "row_1",
+          "title": "Item 1",
+          "description": "Description for item 1"
+        },
+        {
+          "row_id": "row_2",
+          "title": "Item 2",
+          "description": "Description for item 2"
+        }
+      ]
+    }
+  ],
+  "footer": "Powered by WA-RS"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `title` | string | Yes | List title |
+| `description` | string | Yes | Body text |
+| `button_text` | string | Yes | Button label to open the list |
+| `sections` | array | Yes | List sections with rows |
+| `footer` | string | No | Footer text |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Interactive
+
+Send a native flow interactive message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/interactive
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "body_text": "Choose an action",
+  "footer_text": "Powered by WA-RS",
+  "buttons": [
+    {
+      "name": "quick_reply",
+      "button_params_json": "{\"display_text\":\"Click Me\",\"id\":\"btn1\"}"
+    }
+  ]
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `body_text` | string | Yes | Body text |
+| `footer_text` | string | No | Footer text |
+| `buttons` | array | Yes | Native flow button items |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Newsletter Admin Invite
+
+Send a newsletter admin invitation.
+
+```
+POST /api/v1/sessions/{session_id}/messages/newsletter-admin-invite
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "newsletter_jid": "120363000000000000@newsletter",
+  "newsletter_name": "My Newsletter",
+  "caption": "Join as admin!",
+  "invite_expiration": 1700000000
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `newsletter_jid` | string | Yes | Newsletter JID |
+| `newsletter_name` | string | Yes | Newsletter name |
+| `caption` | string | No | Invitation message |
+| `invite_expiration` | number | No | Expiration timestamp |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Newsletter Follower Invite
+
+Send a newsletter follower invitation.
+
+```
+POST /api/v1/sessions/{session_id}/messages/newsletter-follower-invite
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "newsletter_jid": "120363000000000000@newsletter",
+  "newsletter_name": "My Newsletter",
+  "caption": "Follow this newsletter!"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `newsletter_jid` | string | Yes | Newsletter JID |
+| `newsletter_name` | string | Yes | Newsletter name |
+| `caption` | string | No | Invitation message |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Order
+
+Send a business order message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/order
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "order_id": "ORD-001",
+  "item_count": 3,
+  "status": "inquiry",
+  "message": "I'd like to order these items",
+  "order_title": "My Order",
+  "total_amount_1000": 50000000,
+  "total_currency_code": "USD"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `order_id` | string | Yes | Order ID |
+| `item_count` | number | No | Number of items |
+| `status` | string | No | `inquiry`, `accepted`, `declined` |
+| `message` | string | No | Order message text |
+| `order_title` | string | No | Order title |
+| `seller_jid` | string | No | Seller JID |
+| `token` | string | No | Order token |
+| `total_amount_1000` | number | No | Total amount * 1000 |
+| `total_currency_code` | string | No | ISO 4217 currency code |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Invoice
+
+Send a business invoice message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/invoice
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "note": "Invoice for services rendered",
+  "token": "inv-token-123",
+  "attachment_type": "pdf",
+  "attachment_mimetype": "application/pdf"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `note` | string | No | Invoice note |
+| `token` | string | No | Invoice token |
+| `attachment_type` | string | No | `image` or `pdf` |
+| `attachment_mimetype` | string | No | MIME type of attachment |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Payment Invite
+
+Send a payment service invitation.
+
+```
+POST /api/v1/sessions/{session_id}/messages/payment-invite
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "service_type": 0
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `service_type` | number | No | Payment service type (integer) |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Pin Message
+
+Pin or unpin a message in a chat.
+
+```
+POST /api/v1/sessions/{session_id}/messages/pin
+```
+
+### Request Body
+
+```json
+{
+  "chat": "628123456789@s.whatsapp.net",
+  "message_id": "3EB0ABC123...",
+  "duration_seconds": 86400
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `chat` | string | Yes | Chat JID |
+| `message_id` | string | Yes | Message ID to pin |
+| `duration_seconds` | number | No | Pin duration (default: 86400) |
+
+### Pin Durations
+
+| Value | Duration |
+|-------|----------|
+| `0` | Unpin |
+| `86400` | 24 hours |
+| `604800` | 7 days |
+| `2592000` | 30 days |
+
+### Example
+
+```bash
+# Pin for 24 hours
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/pin \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chat": "628123456789@s.whatsapp.net",
+    "message_id": "3EB0ABC123...",
+    "duration_seconds": 86400
+  }'
+
+# Unpin
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/pin \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "chat": "628123456789@s.whatsapp.net",
+    "message_id": "3EB0ABC123...",
+    "duration_seconds": 0
+  }'
+```
+
+---
+
+## Forward Message
+
+Forward a message to another chat.
+
+```
+POST /api/v1/sessions/{session_id}/messages/forward
+```
+
+### Request Body
+
+```json
+{
+  "to": "628987654321@s.whatsapp.net",
+  "text": "Forwarded content here"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `text` | string | Yes | Text content to forward |
+| `reply_to` | string | No | Message ID to reply to |
 
 ---
 
@@ -215,8 +621,8 @@ POST /api/v1/sessions/{session_id}/messages/edit
 
 ```json
 {
+  "to": "628123456789",
   "message_id": "3EB0ABC123...",
-  "chat": "628123456789",
   "text": "Edited message text"
 }
 ```
@@ -233,8 +639,8 @@ POST /api/v1/sessions/{session_id}/messages/react
 
 ```json
 {
+  "to": "628123456789",
   "message_id": "3EB0ABC123...",
-  "chat": "628123456789",
   "emoji": "👍"
 }
 ```
@@ -243,8 +649,8 @@ To remove reaction, send empty emoji:
 
 ```json
 {
+  "to": "628123456789",
   "message_id": "3EB0ABC123...",
-  "chat": "628123456789",
   "emoji": ""
 }
 ```
@@ -275,14 +681,6 @@ To revoke another user's message as a group admin:
   "to": "123456789-1234567890@g.us",
   "message_id": "3EB0ABC123...",
   "original_sender": "628987654321@s.whatsapp.net"
-}
-```
-
-### Response
-
-```json
-{
-  "success": true
 }
 ```
 
@@ -327,14 +725,6 @@ For group messages, include the sender:
 }
 ```
 
-### Response
-
-```json
-{
-  "success": true
-}
-```
-
 ### Example
 
 ```bash
@@ -349,6 +739,405 @@ curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/read \
 
 ---
 
+## Send Poll Update (Vote)
+
+Submit a vote on an existing poll.
+
+```
+POST /api/v1/sessions/{session_id}/messages/poll-update
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "poll_message_id": "3EB0ABC123...",
+  "selected_options": ["sha256-hash-of-option"],
+  "enc_iv": "base64-encoded-iv",
+  "enc_payload": "base64-encoded-payload"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Chat JID where the poll was created |
+| `poll_message_id` | string | Yes | Message ID of the poll |
+| `selected_options` | array | Yes | SHA-256 hashes of selected option texts |
+| `enc_iv` | string | No | Encryption IV (base64) |
+| `enc_payload` | string | No | Encryption payload (base64) |
+
+---
+
+## Send Buttons Response
+
+Send a response to a buttons message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/buttons-response
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "selected_button_id": "btn_1",
+  "selected_display_text": "Option 1"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `selected_button_id` | string | Yes | ID of the selected button |
+| `selected_display_text` | string | Yes | Display text of the selected button |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send List Response
+
+Send a response to a list message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/list-response
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "title": "Category 1",
+  "selected_row_id": "row_1",
+  "description": "Description for the selection"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `title` | string | Yes | Title of the selection |
+| `selected_row_id` | string | Yes | ID of the selected row |
+| `description` | string | No | Description of the selection |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Interactive Response
+
+Send a response to a native flow interactive message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/interactive-response
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "body_text": "Response body",
+  "name": "quick_reply",
+  "params_json": "{\"id\":\"btn1\"}",
+  "version": 3
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `body_text` | string | No | Response body text |
+| `name` | string | Yes | Native flow response name |
+| `params_json` | string | Yes | Response parameters (JSON string) |
+| `version` | number | No | Native flow version (default: 3) |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Highly Structured Message (HSM)
+
+Send a highly structured message (template).
+
+```
+POST /api/v1/sessions/{session_id}/messages/highly-structured
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "namespace": "your_namespace",
+  "element_name": "template_name",
+  "params": ["param1", "param2"],
+  "fallback_lg": "en",
+  "fallback_lc": "US"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `namespace` | string | Yes | Template namespace |
+| `element_name` | string | Yes | Template element name |
+| `params` | array | No | Template parameters |
+| `fallback_lg` | string | No | Fallback language |
+| `fallback_lc` | string | No | Fallback locale |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Template Button Reply
+
+Send a reply to a template button message.
+
+```
+POST /api/v1/sessions/{session_id}/messages/template-button-reply
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "selected_id": "btn_1",
+  "selected_display_text": "Option 1",
+  "selected_index": 0
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `selected_id` | string | Yes | ID of the selected template button |
+| `selected_display_text` | string | Yes | Display text of the selected button |
+| `selected_index` | number | No | Index of the selected button |
+| `reply_to` | string | No | Message ID to reply to |
+
+---
+
+## Send Comment
+
+Send a comment on a message in a group or newsletter.
+
+```
+POST /api/v1/sessions/{session_id}/messages/comment
+```
+
+### Request Body
+
+```json
+{
+  "to": "120363000000000000@g.us",
+  "text": "This is my comment",
+  "target_message_id": "3EB0ABC123...",
+  "target_chat_jid": "120363000000000000@g.us"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Group/newsletter JID |
+| `text` | string | Yes | Comment text |
+| `target_message_id` | string | Yes | Message ID being commented on |
+| `target_chat_jid` | string | No | Chat JID of the target message |
+
+---
+
+## Send Scheduled Call
+
+Schedule a voice or video call in a group.
+
+```
+POST /api/v1/sessions/{session_id}/messages/scheduled-call
+```
+
+### Request Body
+
+```json
+{
+  "to": "120363000000000000@g.us",
+  "scheduled_timestamp_ms": 1700000000000,
+  "call_type": "voice",
+  "title": "Weekly Team Sync"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Group JID |
+| `scheduled_timestamp_ms` | number | Yes | Scheduled time (Unix ms) |
+| `call_type` | string | No | `voice` or `video` (default: `voice`) |
+| `title` | string | No | Call title |
+
+---
+
+## Edit Scheduled Call
+
+Cancel or edit a scheduled call.
+
+```
+POST /api/v1/sessions/{session_id}/messages/scheduled-call-edit
+```
+
+### Request Body
+
+```json
+{
+  "to": "120363000000000000@g.us",
+  "scheduled_call_message_id": "3EB0ABC123...",
+  "edit_type": "cancel"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Group JID |
+| `scheduled_call_message_id` | string | Yes | Message ID of the scheduled call |
+| `edit_type` | string | No | `cancel` (default: `cancel`) |
+
+---
+
+## Send Payment
+
+Send a payment to a contact.
+
+```
+POST /api/v1/sessions/{session_id}/messages/send-payment
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "note": "Payment for services",
+  "request_message_id": "3EB0ABC123...",
+  "transaction_data": "{\"key\":\"value\"}"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `note` | string | No | Payment note |
+| `request_message_id` | string | No | Original payment request message ID |
+| `transaction_data` | string | No | Transaction data (JSON string) |
+
+---
+
+## Request Payment
+
+Send a payment request to a contact.
+
+```
+POST /api/v1/sessions/{session_id}/messages/request-payment
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "currency_code": "USD",
+  "amount1000": 50000000,
+  "note": "Payment for invoice #123",
+  "expiry_timestamp": 1700086400
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `currency_code` | string | Yes | ISO 4217 currency code |
+| `amount1000` | number | Yes | Amount in smallest unit * 1000 |
+| `note` | string | No | Payment request note |
+| `expiry_timestamp` | number | No | Request expiration timestamp |
+
+---
+
+## Cancel Payment Request
+
+Cancel a previously sent payment request.
+
+```
+POST /api/v1/sessions/{session_id}/messages/cancel-payment
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "request_message_id": "3EB0ABC123..."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `request_message_id` | string | Yes | Message ID of the payment request |
+
+---
+
+## Decline Payment Request
+
+Decline a received payment request.
+
+```
+POST /api/v1/sessions/{session_id}/messages/decline-payment
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "request_message_id": "3EB0ABC123..."
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `request_message_id` | string | Yes | Message ID of the payment request |
+
+---
+
+## Send Newsletter Forward
+
+Forward a newsletter message to a contact or group.
+
+```
+POST /api/v1/sessions/{session_id}/messages/newsletter-forward
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789@s.whatsapp.net",
+  "text": "Check out this newsletter post",
+  "newsletter_jid": "120363000000000000@newsletter",
+  "server_message_id": 42,
+  "newsletter_name": "My Newsletter",
+  "content_type": "update"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID |
+| `text` | string | Yes | Text content |
+| `newsletter_jid` | string | Yes | Newsletter JID |
+| `server_message_id` | number | Yes | Server message ID from newsletter |
+| `newsletter_name` | string | No | Newsletter name |
+| `content_type` | string | No | `update`, `update_card`, `link_card` |
+
+---
+
 ## Media Data Format
 
 All media endpoints accept either URL or base64:
@@ -357,9 +1146,7 @@ All media endpoints accept either URL or base64:
 
 ```json
 {
-  "media": {
-    "url": "https://example.com/file.jpg"
-  }
+  "url": "https://example.com/file.jpg"
 }
 ```
 
@@ -367,10 +1154,24 @@ All media endpoints accept either URL or base64:
 
 ```json
 {
-  "media": {
-    "base64": "base64-encoded-data...",
-    "mimetype": "image/jpeg"
-  }
+  "data": "base64-encoded-data...",
+  "mimetype": "image/jpeg"
+}
+```
+
+### Uploaded Format
+
+If you've already uploaded via the `/media/upload` endpoint:
+
+```json
+{
+  "url": "https://mmg.whatsapp.net/...",
+  "direct_path": "/v/t62.7...",
+  "media_key": "base64-key",
+  "file_sha256": "base64-sha256",
+  "file_enc_sha256": "base64-enc-sha256",
+  "file_length": 12345,
+  "mimetype": "image/jpeg"
 }
 ```
 

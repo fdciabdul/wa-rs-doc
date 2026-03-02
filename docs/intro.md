@@ -25,14 +25,32 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 - **Message Reactions** - Add emoji reactions to messages
 - **Message Editing** - Edit sent messages
 - **Voice Notes** - Send push-to-talk audio messages
+- **Polls** - Create polls with multiple options
+- **Buttons & Lists** - Send interactive button and list messages
+- **Interactive Messages** - Native flow interactive messages
+- **Newsletter Invites** - Send admin and follower newsletter invitations
+- **Business Messages** - Orders, invoices, and payment invitations
+- **Pin Messages** - Pin and unpin messages in chats
+- **Forward Messages** - Forward messages between chats
+- **Scheduled Calls** - Schedule voice/video calls in groups
+- **Payment Messages** - Send, request, cancel, and decline payments
+- **Comment Messages** - Comment on messages in groups
 
-### Dashboard
-- **Terminal Theme** - Beautiful hacker-style terminal UI
-- **Session Management** - Create, connect, disconnect, and delete sessions
-- **QR Code Display** - Visual QR code for easy scanning
-- **Pair Code Support** - Connect using phone number and 8-digit code
-- **Real-time Status** - Monitor session connection status
-- **Protected Access** - JWT-based authentication for dashboard
+### Contact & Group Management
+- **Contact Lookup** - Check WhatsApp registration, get profiles and user info
+- **Group Management** - Create groups, manage participants, admins, and settings
+- **Privacy Settings** - View privacy configuration
+- **Blocking** - Block and unblock contacts
+- **Presence** - Set online status and subscribe to presence updates
+- **Chat State** - Send typing and recording indicators
+
+### Advanced Features
+- **GraphQL/MEX Operations** - Execute WhatsApp internal GraphQL queries and mutations
+- **Spam Reporting** - Report spam messages
+- **TCToken Management** - Issue, query, and prune trust contact tokens
+- **Auto-Reconnect** - Configure automatic reconnection on disconnect
+- **History Sync** - Control message history synchronization
+- **Media Upload/Download** - Upload and download encrypted media files
 
 ### Developer Experience
 - **Swagger UI** - Interactive API documentation at `/swagger-ui`
@@ -46,10 +64,10 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 ┌─────────────────────────────────────────────────────────────┐
 │                        WA-RS Gateway                        │
 ├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
-│  │  Dashboard  │  │  REST API   │  │  Webhook Dispatcher │  │
-│  │  (Askama)   │  │  (Axum)     │  │                     │  │
-│  └─────────────┘  └─────────────┘  └─────────────────────┘  │
+│  ┌──────────────────┐  ┌────────────────────────────────┐   │
+│  │    REST API       │  │      Webhook Dispatcher        │   │
+│  │    (Axum)         │  │                                │   │
+│  └──────────────────┘  └────────────────────────────────┘   │
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────────────────────────────────────────────────┐│
 │  │              Session Manager (Multi-Device)             ││
@@ -68,7 +86,6 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 |-----------|------------|
 | Language | Rust |
 | Web Framework | Axum 0.8 |
-| Template Engine | Askama |
 | Database | PostgreSQL + SQLite |
 | Authentication | JWT (jsonwebtoken) |
 | WhatsApp Protocol | wacore (custom) |
@@ -79,7 +96,6 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 - [Getting Started](./getting-started) - Quick start guide
 - [Installation](./installation) - Detailed installation instructions
 - [Authentication](./authentication) - JWT authentication guide
-- [Dashboard](./dashboard) - Using the web dashboard
 - [API Reference](./api/sessions) - Complete API documentation
 - [Webhooks](./api/webhooks) - Setting up webhook notifications
 
