@@ -13,9 +13,10 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 - **Multi-Session Support** - Manage multiple WhatsApp sessions simultaneously
 - **QR Code & Pair Code Authentication** - Connect via QR code scanning or 8-digit pair code
 - **Webhook Events** - Receive real-time notifications with HMAC-SHA256 signature verification
+- **NATS JetStream** - Optional durable event streaming and queue-based outbound messaging
 - **RESTful API** - Simple JSON-based API with OpenAPI/Swagger documentation
 - **JWT Authentication** - Secure API access with token-based authentication
-- **Docker Ready** - Easy deployment with Docker and Docker Compose
+- **Docker Ready** - Easy deployment with Docker and Docker Compose (PostgreSQL + NATS included)
 
 ### Messaging Capabilities
 - **Text Messages** - Send plain text messages
@@ -61,23 +62,23 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        WA-RS Gateway                        │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────────┐  ┌────────────────────────────────┐   │
-│  │    REST API       │  │      Webhook Dispatcher        │   │
-│  │    (Axum)         │  │                                │   │
-│  └──────────────────┘  └────────────────────────────────┘   │
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │              Session Manager (Multi-Device)             ││
-│  └─────────────────────────────────────────────────────────┘│
-├─────────────────────────────────────────────────────────────┤
-│  ┌─────────────────┐              ┌─────────────────────┐   │
-│  │   PostgreSQL    │              │   SQLite (Sessions) │   │
-│  │   (Metadata)    │              │   (WhatsApp State)  │   │
-│  └─────────────────┘              └─────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                        WA-RS Gateway                          │
+├──────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────────┐  ┌───────────────┐   │
+│  │   REST API   │  │     Webhook      │  │     NATS      │   │
+│  │   (Axum)     │  │   Dispatcher     │  │   JetStream   │   │
+│  └──────────────┘  └──────────────────┘  └───────────────┘   │
+├──────────────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────────────────┐│
+│  │              Session Manager (Multi-Device)              ││
+│  └──────────────────────────────────────────────────────────┘│
+├──────────────────────────────────────────────────────────────┤
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────┐  │
+│  │   PostgreSQL    │  │  SQLite (WA)    │  │    NATS      │  │
+│  │   (Metadata)    │  │  (Sessions)     │  │  (Streams)   │  │
+│  └─────────────────┘  └─────────────────┘  └─────────────┘  │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ## Tech Stack
@@ -87,6 +88,7 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 | Language | Rust |
 | Web Framework | Axum 0.8 |
 | Database | PostgreSQL + SQLite |
+| Message Queue | NATS JetStream (optional) |
 | Authentication | JWT (jsonwebtoken) |
 | WhatsApp Protocol | wacore (custom) |
 | Documentation | Swagger/OpenAPI |
@@ -98,6 +100,7 @@ WA-RS is a high-performance WhatsApp REST API Gateway built with Rust. It provid
 - [Authentication](./authentication) - JWT authentication guide
 - [API Reference](./api/sessions) - Complete API documentation
 - [Webhooks](./api/webhooks) - Setting up webhook notifications
+- [NATS JetStream](./api/nats) - Event streaming and outbound messaging
 
 ## Support the Project
 

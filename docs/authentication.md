@@ -136,20 +136,5 @@ These endpoints don't require authentication:
 | Endpoint | Description |
 |----------|-------------|
 | `GET /health` | Health check |
-| `GET /dashboard/*` | Web Dashboard |
 | `GET /swagger-ui/*` | Swagger UI |
 | `GET /api-docs/*` | OpenAPI spec |
-
-## Dashboard Access
-
-The web dashboard at `/dashboard` doesn't require JWT authentication. You can access it directly at:
-
-```
-http://localhost:3451/dashboard
-```
-
-The dashboard provides a user-friendly interface to:
-- View and manage sessions
-- Create new sessions with QR code or pair code
-- Configure webhooks
-- View JWT token in settings

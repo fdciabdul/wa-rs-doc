@@ -12,6 +12,7 @@ WA-RS is a multi-session WhatsApp REST API gateway built with Rust. It provides 
 - **QR Code & Pair Code authentication** - Connect via QR scan or phone number
 - **Send messages** - Text, image, video, audio, document, sticker, location, contact
 - **Webhook support** - Receive events with HMAC-SHA256 signatures
+- **NATS JetStream** - Optional durable event streaming and outbound message queue
 - **JWT authentication** - Secure API access
 - **PostgreSQL database** - Persistent session storage
 - **Swagger UI** - Interactive API documentation
@@ -22,7 +23,7 @@ WA-RS is a multi-session WhatsApp REST API gateway built with Rust. It provides 
 
 ```bash
 git clone https://github.com/fdciabdul/wa-rs.git
-cd wa-rs/rest-api
+cd wa-rs
 docker compose up -d
 ```
 
@@ -35,7 +36,7 @@ docker compose up -d
 2. **Clone and build**
    ```bash
    git clone https://github.com/fdciabdul/wa-rs.git
-   cd wa-rs/rest-api
+   cd wa-rs
    cargo build --release
    ```
 
@@ -57,12 +58,13 @@ After starting the server:
 | Endpoint | Description |
 |----------|-------------|
 | http://localhost:3451 | API Base URL |
-| http://localhost:3451/dashboard | Web Dashboard |
 | http://localhost:3451/swagger-ui | Swagger UI Documentation |
 | http://localhost:3451/health | Health Check |
+| http://localhost:3451/api/v1/nats/status | NATS Status (if enabled) |
 
 ## Next Steps
 
 - [Installation Guide](./installation) - Detailed setup instructions
 - [Authentication](./authentication) - How to authenticate API requests
 - [API Reference](./api/sessions) - Complete API documentation
+- [NATS JetStream](./api/nats) - Event streaming and outbound messaging

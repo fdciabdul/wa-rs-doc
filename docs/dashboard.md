@@ -54,3 +54,4 @@ Endpoints are organized into the following groups:
 | `mex` | GraphQL/MEX operations |
 | `newsletter` | Newsletter/Channel messages |
 | `operations` | Spam reporting, TCToken, reconnection, and sync |
+| `nats` | NATS JetStream management and status |
