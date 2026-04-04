@@ -11,7 +11,7 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://fdciabdul.github.io',
+  url: 'https://wa-rs.imtaqin.id',
   baseUrl: '/',
 
   organizationName: 'fdciabdul',
