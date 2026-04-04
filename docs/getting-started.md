@@ -15,19 +15,23 @@ WA-RS is a multi-session WhatsApp REST API gateway built with Rust. It provides 
 - **Webhook support** — Receive events with HMAC-SHA256 signatures
 - **NATS JetStream** — Optional durable event streaming and outbound message queue
 - **JWT authentication** — Secure API access
-- **Multi-database support** — PostgreSQL, MySQL, or SQLite via `DATABASE_URL`
+- **Multi-database support** — PostgreSQL or MySQL via `DATABASE_URL`
 - **CLI arguments** — Configure token, database, and port from command line
 - **Swagger UI** — Interactive API documentation
 
-## Quick Start (Fastest)
+## Quick Start
 
-Download the binary and run with zero config — uses SQLite by default:
+### With MySQL
 
 ```bash
-./wa-rs --token mysecrettoken
+./wa-rs --token mysecrettoken --db mysql://user:pass@localhost:3306/wars
 ```
 
-That's it. The server starts on port 3451 with a local SQLite database.
+### With PostgreSQL
+
+```bash
+./wa-rs --token mysecrettoken --db postgres://user:pass@localhost:5432/wagateway
+```
 
 ```bash
 # Test it
@@ -42,7 +46,7 @@ cd wa-rs
 
 # Create .env
 cat > .env << 'EOF'
-DATABASE_URL=sqlite://wa-rs.db
+DATABASE_URL=mysql://user:pass@host:3306/wars
 SUPERADMIN_TOKEN=mysecrettoken
 EOF
 
@@ -53,7 +57,7 @@ docker compose up -d
 
 1. **Requirements**
    - Rust nightly
-   - One of: PostgreSQL 14+, MySQL 8+, or SQLite 3
+   - PostgreSQL 14+ or MySQL 8+
 
 2. **Clone and build**
    ```bash
@@ -65,11 +69,11 @@ docker compose up -d
 
 3. **Run**
    ```bash
-   # Simplest: SQLite + custom token
-   ./target/release/wa-rs --token mysecrettoken
-
    # With MySQL
    ./target/release/wa-rs --token mysecrettoken --db mysql://user:pass@localhost/mydb
+
+   # With PostgreSQL
+   ./target/release/wa-rs --token mysecrettoken --db postgres://user:pass@localhost/wagateway
 
    # With .env file
    cp .env.example .env
@@ -84,7 +88,7 @@ Usage: wa-rs [OPTIONS]
 
 Options:
   -t, --token <TOKEN>    Set superadmin token
-  -d, --db <URL>         Set database URL (postgres/mysql/sqlite)
+  -d, --db <URL>         Set database URL (postgres/mysql)
   -p, --port <PORT>      Set server port (default: 3451)
   -h, --help             Show help
 ```

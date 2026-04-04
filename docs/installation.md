@@ -4,15 +4,15 @@ sidebar_position: 2
 
 # Installation
 
-## Quick Start (No Setup)
+## Quick Start
 
 Download the binary for your platform from [GitHub Releases](https://github.com/fdciabdul/wa-rs/releases) and run:
 
 ```bash
-./wa-rs --token mysecrettoken
+./wa-rs --token mysecrettoken --db mysql://user:pass@localhost:3306/wars
 ```
 
-Uses local SQLite by default — no database server needed.
+A PostgreSQL or MySQL database is required for metadata storage.
 
 ## Docker Compose
 
@@ -25,9 +25,8 @@ Create a `.env` file:
 
 ```bash
 # Database — choose one:
-DATABASE_URL=sqlite://wa-rs.db
+DATABASE_URL=mysql://user:password@host:3306/wars
 # DATABASE_URL=postgres://user:password@localhost:5432/wagateway
-# DATABASE_URL=mysql://user:password@localhost:3306/wagateway
 
 # Authentication
 SUPERADMIN_TOKEN=your-secret-token
@@ -76,7 +75,7 @@ cd wa-rs
 cargo build --release
 
 # Run
-./target/release/wa-rs --token mysecrettoken
+./target/release/wa-rs --token mysecrettoken --db mysql://user:pass@localhost/wars
 ```
 
 ### Windows
@@ -94,7 +93,7 @@ cd wa-rs
 cargo build --release
 
 # Run
-.\target\release\wa-rs.exe --token mysecrettoken
+.\target\release\wa-rs.exe --token mysecrettoken --db mysql://user:pass@localhost/wars
 ```
 
 ### macOS
@@ -114,7 +113,7 @@ cd wa-rs
 cargo build --release
 
 # Run
-./target/release/wa-rs --token mysecrettoken
+./target/release/wa-rs --token mysecrettoken --db postgres://user:pass@localhost/wagateway
 ```
 
 ## CLI Arguments
@@ -124,7 +123,7 @@ Usage: wa-rs [OPTIONS]
 
 Options:
   -t, --token <TOKEN>    Set superadmin token
-  -d, --db <URL>         Set database URL (postgres/mysql/sqlite)
+  -d, --db <URL>         Set database URL (postgres/mysql)
   -p, --port <PORT>      Set server port (default: 3451)
   -h, --help             Show help
 ```
@@ -132,34 +131,18 @@ Options:
 Examples:
 
 ```bash
-# SQLite with custom token (simplest)
-./wa-rs --token mysecrettoken
-
 # MySQL with custom port
 ./wa-rs --token mytoken --db mysql://user:pass@localhost:3306/wars --port 8080
 
 # PostgreSQL
 ./wa-rs -t mytoken -d postgres://user:pass@localhost:5432/wagateway
-
-# SQLite with specific file
-./wa-rs -t mytoken -d sqlite://data/wa-rs.db
 ```
 
 CLI arguments override `.env` values.
 
 ## Database Setup
 
-WA-RS supports **PostgreSQL**, **MySQL**, and **SQLite**. If no database is configured, it defaults to SQLite (`wa-rs.db` in the current directory).
-
-### SQLite (Default — No Setup)
-
-```bash
-# Just run — database file created automatically
-./wa-rs --token mytoken
-
-# Or specify a path
-./wa-rs --token mytoken --db sqlite://data/wa-rs.db
-```
+WA-RS requires **PostgreSQL** or **MySQL** for metadata storage (sessions, webhooks). WhatsApp session data is stored separately in local SQLite files.
 
 ### PostgreSQL
 
@@ -182,7 +165,7 @@ mysql -u root -p -e "CREATE DATABASE wars;"
 ```
 
 :::info Legacy PostgreSQL Config
-If you don't set `DATABASE_URL`, WA-RS checks for legacy `POSTGRES_*` environment variables. If those aren't set either, it defaults to SQLite.
+If you don't set `DATABASE_URL`, WA-RS checks for legacy `POSTGRES_*` or `MYSQL_*` environment variables as fallback.
 ```bash
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
@@ -198,7 +181,7 @@ POSTGRES_DB=wagateway
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DATABASE_URL` | `sqlite://wa-rs.db` | Database connection URL (postgres/mysql/sqlite) |
+| `DATABASE_URL` | *(none — required)* | Database connection URL (`postgres://` or `mysql://`) |
 
 ### Authentication
 
@@ -212,7 +195,7 @@ POSTGRES_DB=wagateway
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3451` | Server port |
-| `WHATSAPP_STORAGE_PATH` | `./whatsapp_sessions` | Session storage path |
+| `WHATSAPP_STORAGE_PATH` | `./whatsapp_sessions` | WhatsApp session storage path (SQLite files) |
 | `RUST_LOG` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
 
 ### NATS JetStream (Optional)
@@ -229,13 +212,7 @@ POSTGRES_DB=wagateway
 
 ## Sample `.env` Files
 
-### Minimal (SQLite)
-
-```bash
-SUPERADMIN_TOKEN=mysecrettoken
-```
-
-### MySQL
+### MySQL (Recommended)
 
 ```bash
 DATABASE_URL=mysql://user:password@localhost:3306/wars
