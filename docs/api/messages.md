@@ -45,6 +45,94 @@ curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/text \
 
 ---
 
+## Fake Reply (Anti-Ban)
+
+Wrap an outgoing text message as a "reply" to a synthesized dummy message so recipients see it in reply-style UI. Useful for blast campaigns to make messages look like conversational replies and reduce spam flagging.
+
+Add the `fake_reply` field to any **Send Text** request body:
+
+```
+POST /api/v1/sessions/{session_id}/messages/text
+```
+
+### Request Body
+
+```json
+{
+  "to": "628123456789",
+  "text": "Ini promo bulan ini!",
+  "fake_reply": {
+    "type": "product",
+    "title": "Laptop Gaming ASUS ROG",
+    "body": "Rp 15.000.000"
+  }
+}
+```
+
+### Fake Reply Types
+
+| Type | Description | Auto-populated fields |
+|---|---|---|
+| `text` | Reply to a dummy text question | Random short question from pool |
+| `product` | Reply to a fake marketplace product listing | Product name, price, store |
+| `order` | Reply to a fake order notification | Order ID, item, quantity, total |
+| `location` | Reply to a fake location pin (Indonesian malls/landmarks) | Lat/long with small jitter |
+| `video` | Reply to a fake video message | Video title, caption |
+| `document` | Reply to a fake PDF document | Filename, caption |
+| `contact` | Reply to a fake vCard contact | Name, phone, vCard block |
+
+All fields inside `fake_reply` are optional except `type`:
+
+| Field | Type | Default |
+|---|---|---|
+| `type` | string | **required** — one of the types above |
+| `title` | string | Auto-generated from type-specific pool |
+| `body` | string | Auto-generated from type-specific pool |
+| `participant` | string | Random JID (`62xxxxxxxxxx@s.whatsapp.net`) |
+| `stanza_id` | string | Random 16-byte hex stanza ID |
+
+Indonesian data pools are bundled — product names (Samsung, ASUS, Xiaomi...), locations (Grand Indonesia, Plaza Senayan with real lat/long), mall-appropriate prices (Rp 15jt - 999jt), etc.
+
+### Example — Product reply style
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/text \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "628123456789",
+    "text": "Pesan Anda sudah kami proses ya kak",
+    "fake_reply": {
+      "type": "order",
+      "title": "Invoice #INV-2026-0042",
+      "body": "Total: Rp 1.250.000"
+    }
+  }'
+```
+
+### Example — Location reply (auto-generated)
+
+```bash
+curl -X POST http://localhost:3451/api/v1/sessions/my-session/messages/text \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "628123456789",
+    "text": "Ya pak, lokasi kami di sini",
+    "fake_reply": { "type": "location" }
+  }'
+```
+
+The recipient sees the message as a quoted reply to a fake pin (random Jakarta mall with real coordinates), making conversational context look natural.
+
+### Notes
+
+- `fake_reply` takes **precedence** over `reply_to`. If both are set, `fake_reply` wins.
+- The quoted "original" message is never sent to anyone — it's only embedded in the outgoing message's `ContextInfo.QuotedMessage` protobuf field, which WhatsApp clients render as a reply.
+- Currently supported on `messages/text` only. Extension to image/video/document payloads is planned.
+
+---
+
 ## Send Image
 
 ```
