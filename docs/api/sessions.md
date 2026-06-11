@@ -24,6 +24,10 @@ POST /api/v1/sessions
     "url": "https://example.com/webhook",
     "events": ["message", "connected"],
     "secret": "webhook-secret"
+  },
+  "device": {
+    "os": "Windows",
+    "platform": "desktop"
   }
 }
 ```
@@ -36,6 +40,10 @@ POST /api/v1/sessions
 | `webhook.url` | string | Yes* | Webhook URL |
 | `webhook.events` | array | No | Events to subscribe (default: all) |
 | `webhook.secret` | string | No | HMAC secret for signature verification |
+| `device` | object | No | Per-session device identity override (see [Device Identity](#device-identity)) |
+| `device.os` | string | No | OS label shown in WhatsApp Linked Devices, e.g. `Windows`, `Mac OS X`, `Ubuntu` |
+| `device.platform` | string | No | Platform type — see table in [Device Identity](#device-identity) |
+| `device.version` | string | No | Dotted app version, e.g. `2.3000.1023902713`. Omit to use library default |
 
 ### Response
 
@@ -200,6 +208,25 @@ Manually trigger connection (usually not needed as create auto-connects).
 POST /api/v1/sessions/{session_id}/connect
 ```
 
+### Request Body (optional)
+
+Accepts an optional device identity override. Same shape as `device` in
+[Create Session](#create-session). The override only takes effect on the
+first successful pair — subsequent reconnects reuse the props that
+whatsapp-rust persisted at pair time.
+
+```json
+{
+  "device": {
+    "os": "Windows",
+    "platform": "desktop"
+  }
+}
+```
+
+Empty body is fine — falls back to environment defaults (`WA_DEVICE_OS`,
+`WA_DEVICE_PLATFORM`, `WA_DEVICE_VERSION`).
+
 ---
 
 ## Pair with Phone Number
@@ -215,9 +242,16 @@ POST /api/v1/sessions/{session_id}/pair
 ```json
 {
   "phone_number": "+628123456789",
-  "show_push_notification": true
+  "show_push_notification": true,
+  "device": {
+    "os": "Windows",
+    "platform": "desktop"
+  }
 }
 ```
+
+`device` is optional. See [Device Identity](#device-identity) for the
+field schema and the available platform values.
 
 ### Response
 
@@ -257,4 +291,63 @@ GET /api/v1/sessions/{session_id}/device
   "lid": "123456789@lid",
   "push_name": "John Doe"
 }
+```
+
+---
+
+## Device Identity
+
+Controls how each session appears in WhatsApp's **Linked Devices** list at
+pair time (the OS string + platform icon). The default is `Windows` /
+`desktop`, which displays as **WhatsApp Desktop** rather than a browser
+client.
+
+### Where it applies
+
+- `POST /api/v1/sessions` — `device` field in the create body
+- `POST /api/v1/sessions/{id}/connect` — optional body with a `device` field
+- `POST /api/v1/sessions/{id}/pair` — `device` field alongside `phone_number`
+
+### Important caveat
+
+Device props are **only honored on the first pair**. Once a device is
+registered with WhatsApp, the gateway persists the props in its SQLite
+store and reuses them on every reconnect. To change the identity of an
+already-paired session, delete it and pair again.
+
+### Field schema
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `os` | string | `Windows` | Free-form OS label shown in WA |
+| `platform` | string | `desktop` | One of the platform values below |
+| `version` | string | _library default_ | Dotted version like `2.3000.1023902713`. Leave unset unless you have a specific reason — forcing a version has been observed to cause silent server-side drops on freshly-paired sessions. |
+
+### Platform values
+
+| Value | Linked Devices icon |
+|-------|---------------------|
+| `desktop` | WhatsApp Desktop (default) |
+| `uwp` | Windows Store app |
+| `chrome` | Google Chrome |
+| `firefox` | Mozilla Firefox |
+| `edge` | Microsoft Edge |
+| `safari` | Safari |
+| `opera` | Opera |
+| `ie` | Internet Explorer |
+| `ipad` | iPad |
+| `ios_phone` | iPhone |
+| `android_phone` | Android Phone |
+| `android_tablet` | Android Tablet |
+
+Unknown values fall back to `desktop`.
+
+### Environment fallback
+
+When no `device` field is sent, the gateway falls back to these env vars:
+
+```
+WA_DEVICE_OS=Windows
+WA_DEVICE_PLATFORM=desktop
+WA_DEVICE_VERSION=               # omit for library default
 ```
