@@ -6,6 +6,42 @@ sidebar_position: 2
 
 Send various types of messages through WhatsApp.
 
+## LID auto-resolve {#lid-auto-resolve}
+
+WhatsApp migrated most consumer contacts to **LID-only** privacy
+addressing. Sending to a legacy `phone@s.whatsapp.net` JID for a
+LID-only contact is accepted by the WA edge **but silently dropped** —
+no error, no delivery.
+
+Every `/messages/*` endpoint in wa-rs runs the `to` field through
+`resolve_recipient_jid`:
+
+| `to` shape | What happens |
+|---|---|
+| `628123456789` (plain phone) | Parsed as `@s.whatsapp.net`, then a `usync` lookup translates it to the contact's `@lid` form when one exists. |
+| `628123456789@s.whatsapp.net` | Same translation as above. |
+| `12300954140784@lid` | Pass-through, no lookup. |
+| `120363...@g.us` / `...@broadcast` | Pass-through. |
+
+The translation is cached inside the upstream lib, so only the
+**first** send per contact pays the usync roundtrip (~50–200 ms);
+subsequent sends reuse the resolved LID. The response shows the JID
+that was actually used:
+
+```json
+{
+  "message_id": "3EB0...",
+  "timestamp": 1781065817,
+  "to": "20045283487834@lid"
+}
+```
+
+::: tip Always send the resolved JID back to clients
+Once you receive the `to` field with `@lid` in the response, persist it
+on the contact record. Subsequent sends become a single hop again on
+the wa-rs side too.
+:::
+
 ## Send Text Message
 
 ```
@@ -446,7 +482,13 @@ POST /api/v1/sessions/{session_id}/messages/interactive
       "name": "quick_reply",
       "button_params_json": "{\"display_text\":\"Click Me\",\"id\":\"btn1\"}"
     }
-  ]
+  ],
+  "view_once": true,
+  "fake_reply": {
+    "type": "text",
+    "title": "Quoted header",
+    "body": "Fake quoted body"
+  }
 }
 ```
 
@@ -457,6 +499,16 @@ POST /api/v1/sessions/{session_id}/messages/interactive
 | `footer_text` | string | No | Footer text |
 | `buttons` | array | Yes | Native flow button items |
 | `reply_to` | string | No | Message ID to reply to |
+| `fake_reply` | object | No | Fabricated quoted-message context. Takes priority over `reply_to`. |
+| `view_once` | boolean | No | Wrap the interactive payload in `viewOnceMessageV2`. **Defaults to `true`** — this is empirically the only reliable way to keep native-flow `quick_reply` buttons clickable on consumer WhatsApp accounts. Set to `false` only when targeting an account that explicitly handles the raw envelope. |
+
+::: warning Consumer WA Web limitation
+`viewOnceMessageV2`-wrapped interactive messages do **not render** in
+WhatsApp Web / Desktop — they show as "This message couldn't load.
+Open the message on your phone to view it." This is a WA Web
+limitation, not a wa-rs bug. Buttons render and click correctly on the
+WhatsApp mobile app.
+:::
 
 ---
 
@@ -794,6 +846,11 @@ POST /api/v1/sessions/{session_id}/messages/edit
 
 ## Send Reaction
 
+Single endpoint, **CAG-transparent**. The handler auto-swaps between
+the plain `ReactionMessage` wire shape (1:1, regular groups) and the
+encrypted CAG addon stanza (community-announce groups / channels)
+based on the recipient — callers don't pick a path.
+
 ```
 POST /api/v1/sessions/{session_id}/messages/react
 ```
@@ -808,6 +865,12 @@ POST /api/v1/sessions/{session_id}/messages/react
 }
 ```
 
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `to` | string | Yes | Recipient JID. Plain phone gets auto-resolved to LID (see [LID auto-resolve](#lid-auto-resolve)). |
+| `message_id` | string | Yes | ID of the message being reacted to |
+| `emoji` | string | Yes | Single emoji. Send `""` to remove the existing reaction. |
+
 To remove reaction, send empty emoji:
 
 ```json
@@ -817,6 +880,12 @@ To remove reaction, send empty emoji:
   "emoji": ""
 }
 ```
+
+::: tip Inbound CAG reactions
+Incoming encrypted reactions on CAG channels are decrypted by the
+upstream lib and surfaced as a regular `reaction` event — no
+special-casing needed on the receiver side.
+:::
 
 ---
 
@@ -1083,7 +1152,10 @@ POST /api/v1/sessions/{session_id}/messages/template-button-reply
 
 ## Send Comment
 
-Send a comment on a message in a group or newsletter.
+Send an encrypted comment on a Community Announcement Group (CAG)
+channel post. Wraps the comment body in a top-level `enc_comment_message`
+envelope encrypted with the parent post's `messageSecret`, mirroring
+WA Web's `WAWebSendCommentMessageAction`.
 
 ```
 POST /api/v1/sessions/{session_id}/messages/comment
@@ -1096,16 +1168,24 @@ POST /api/v1/sessions/{session_id}/messages/comment
   "to": "120363000000000000@g.us",
   "text": "This is my comment",
   "target_message_id": "3EB0ABC123...",
-  "target_chat_jid": "120363000000000000@g.us"
+  "target_chat_jid": "120363000000000000@g.us",
+  "target_participant": "628xxxxxxxxxx@lid"
 }
 ```
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `to` | string | Yes | Group/newsletter JID |
+| `to` | string | Yes | Channel / community-announce group JID where the parent post lives |
 | `text` | string | Yes | Comment text |
-| `target_message_id` | string | Yes | Message ID being commented on |
-| `target_chat_jid` | string | No | Chat JID of the target message |
+| `target_message_id` | string | Yes | Message ID of the parent post |
+| `target_chat_jid` | string | No | Override for the chat JID embedded in the target key. Defaults to `to`. |
+| `target_participant` | string | No | Author JID of the parent post. Required when the lib has no stored `messageSecret` for the parent (e.g. you never received the post locally). |
+
+::: tip Inbound comments
+Incoming encrypted comments are decrypted by the upstream lib and
+dispatched as a regular `message` event with the inner body. The parent
+post key surfaces under `comment_target` in `MessageInfo`.
+:::
 
 ---
 
