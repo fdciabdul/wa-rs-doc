@@ -159,10 +159,51 @@ All webhook payloads follow this format:
     "from": "628123456789@s.whatsapp.net",
     "chat": "628123456789@s.whatsapp.net",
     "message_id": "3EB0ABC123...",
-    "is_from_me": false
+    "is_from_me": false,
+    "push_name": "Sender",
+    "message_type": "text",
+    "text": "hello",
+    "caption": null,
+    "media_mimetype": null,
+    "media": null,
+    "location": null,
+    "is_group": false,
+    "participant": "628123456789@s.whatsapp.net"
   }
 }
 ```
+
+### Location Message (v0.6.2+)
+
+When `message_type` is `location` or a live location is received, the
+`location` field carries the GPS payload.
+
+```json
+{
+  "session_id": "my-session",
+  "event": "message",
+  "data": {
+    "from": "628123456789@s.whatsapp.net",
+    "message_id": "AC...",
+    "message_type": "location",
+    "text": null,
+    "location": {
+      "latitude": -6.98,
+      "longitude": 109.13,
+      "name": "Hotel X",
+      "address": "Jl. Sudirman No. 1",
+      "url": "https://maps.google.com/?q=-6.98,109.13",
+      "accuracy_meters": 12,
+      "speed_mps": 0,
+      "is_live": false
+    }
+  }
+}
+```
+
+Live locations carry the same `latitude`/`longitude` plus
+`sequence_number`, optional `caption`, and `is_live: true`. The body
+streams as a series of `message` events with the same `message_id`.
 
 ### Connected Event
 
