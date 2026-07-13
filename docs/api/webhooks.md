@@ -79,6 +79,57 @@ DELETE /api/v1/sessions/{session_id}/webhooks/{webhook_id}
 
 ---
 
+## Re-enable Webhook
+
+Webhooks are auto-disabled after 100 consecutive delivery failures (see
+[Auto-disable](#circuit-breaker--auto-disable) below). Use this endpoint to flip a
+disabled webhook back to `enabled=true` and clear the disable metadata
+once the target endpoint is fixed.
+
+```
+POST /api/v1/sessions/{session_id}/webhooks/{webhook_id}/enable
+```
+
+### Response
+
+```json
+{
+  "success": true,
+  "message": "Webhook re-enabled"
+}
+```
+
+---
+
+## Circuit Breaker & Auto-disable
+
+The dispatcher tracks per-URL delivery failures and reacts in two
+stages so a single dead endpoint can't flood the log or block the
+runtime.
+
+- **OPEN (5 min cooldown)** — after 25 consecutive failures the URL
+  enters an OPEN circuit. Dispatch is skipped for 5 minutes; log lines
+  drop to a single `circuit OPEN` warning instead of one per attempt.
+- **Auto-disable (permanent)** — after 100 consecutive failures the
+  webhook row is switched to `enabled=false`, `disabled_at` gets the
+  current timestamp, and `disabled_reason` records the last error
+  string. In-memory registrations pointing at that URL are purged from
+  every session at the same time. The dispatcher will never try the
+  URL again until it is re-enabled via `POST /webhooks/{id}/enable`.
+
+### Schema columns
+
+The `webhooks` table carries two additional columns:
+
+- `disabled_at` (`TIMESTAMPTZ` / `VARCHAR(30)` / `TEXT` depending on
+  backend) — when the auto-disable fired, `NULL` otherwise
+- `disabled_reason` (`TEXT`) — the last error surfaced before the
+  auto-disable, for later triage
+
+Both are cleared by `POST /webhooks/{id}/enable`.
+
+---
+
 ## Event Types
 
 ### Core Events

@@ -137,6 +137,21 @@ Delete a session and disconnect from WhatsApp.
 DELETE /api/v1/sessions/{session_id}
 ```
 
+### Cascade behaviour
+
+Session delete cascades on both storage layers:
+
+- **DB rows** — child rows in `webhooks`, `contacts`, and `webhook_dlq`
+  scoped to this `session_id` are dropped explicitly before the
+  `sessions` row is removed. This runs even on databases whose tables
+  were migrated in without an `ON DELETE CASCADE` constraint, so no
+  orphans are left behind.
+- **In-memory registry** — every webhook registration pointing at this
+  session is removed from the dispatcher, along with any open circuit
+  state for those URLs.
+- **Storage directory** — the on-disk session store under
+  `WHATSAPP_STORAGE_PATH/{session_id}` is unlinked.
+
 ### Response
 
 ```json

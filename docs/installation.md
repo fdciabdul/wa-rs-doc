@@ -80,21 +80,37 @@ cargo build --release
 
 ### Windows
 
+The prebuilt release binary is compiled with `x86_64-pc-windows-gnu`
+(MinGW runtime is statically linked) so it runs on a fresh Windows
+install without needing the Microsoft Visual C++ Redistributable
+(`VCRUNTIME140.dll`). Just download the `.zip`, extract, and run.
+
+To build from source:
+
 ```powershell
 # 1. Install Rust from https://rustup.rs
 # 2. Open a new terminal after installation
 
-# Install nightly toolchain
+# Install nightly toolchain + the GNU target
 rustup default nightly
+rustup target add x86_64-pc-windows-gnu
+
+# MinGW for the C toolchain
+choco install mingw -y
 
 # Clone and build
 git clone https://github.com/fdciabdul/wa-rs.git
 cd wa-rs
-cargo build --release
+cargo build --release --target x86_64-pc-windows-gnu
 
 # Run
-.\target\release\wa-rs.exe --token mysecrettoken --db mysql://user:pass@localhost/wars
+.\target\x86_64-pc-windows-gnu\release\wa-rs.exe --token mysecrettoken --db mysql://user:pass@localhost/wars
 ```
+
+If you build with the default MSVC target instead
+(`cargo build --release` without `--target`), the resulting binary
+depends on `VCRUNTIME140.dll` and will fail with a "DLL not found"
+error on machines without the VC++ Redistributable installed.
 
 ### macOS
 
