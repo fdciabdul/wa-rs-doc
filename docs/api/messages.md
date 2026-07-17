@@ -543,7 +543,50 @@ POST /api/v1/sessions/{session_id}/messages/cta-url
 | `display_text` | string | Yes | Label rendered on the button (e.g. "Open website") |
 | `url` | string | Yes | URL the button opens |
 | `merchant_url` | string | No | Merchant URL shown in link preview UI on some clients. Falls back to `url` when omitted. |
+| `image` | object | No | Optional image displayed as the interactive header, above the body. Accepts `{ "url": "https://…" }` or `{ "data": "<base64>", "mimetype": "image/jpeg" }`. Added in v0.7.8. |
 | `reply_to` | string | No | Message ID to reply to |
+
+#### With an image header
+
+Since **v0.7.8**, `cta-url` can carry an image above the body. Waxum
+uploads the image to the WhatsApp CDN and wires it in as the
+interactive header media, so the button ships with a thumbnail on the
+recipient side.
+
+```json
+{
+  "to": "628123456789",
+  "body_text": "Ramadan drop is live. Free shipping today only.",
+  "footer_text": "waxum.imtaqin.id",
+  "display_text": "Shop now",
+  "url": "https://example.com/ramadan",
+  "image": { "url": "https://cdn.example.com/promo/ramadan-header.jpg" }
+}
+```
+
+Or with a base64 body — useful when the image is generated on your
+side and you would rather not host a public URL:
+
+```json
+{
+  "to": "628123456789",
+  "body_text": "Your monthly statement is ready.",
+  "display_text": "Open PDF",
+  "url": "https://billing.example.com/october",
+  "image": {
+    "data": "iVBORw0KGgoAAAANS…truncated…",
+    "mimetype": "image/png"
+  }
+}
+```
+
+Notes:
+- Recommended shape: 4:3 or 16:9, ≥ 512 px on the long edge. WhatsApp
+  down-scales aggressively.
+- MIME must be `image/jpeg` or `image/png` — other types are rejected
+  at the WhatsApp side even if waxum accepts the upload.
+- When `image` is omitted the message renders as the text-only CTA
+  URL — same shape as before v0.7.8.
 
 ---
 
