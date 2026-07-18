@@ -11,6 +11,10 @@ const config: Config = {
     v4: true,
   },
 
+  markdown: {
+    format: 'detect',
+  },
+
   url: 'https://waxum.imtaqin.id',
   baseUrl: '/',
 
@@ -24,6 +28,18 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
+  themes: [
+    [
+      require.resolve('@easyops-cn/docusaurus-search-local'),
+      {
+        hashed: true,
+        indexBlog: false,
+        indexPages: true,
+        highlightSearchTermsOnTargetPage: true,
+      },
+    ],
+  ],
 
   presets: [
     [
