@@ -43,7 +43,7 @@ POST /api/v1/sessions/{session_id}/calls/ring
 
 ```json
 {
-  "to": "6285117822731",
+  "to": "628123456789",
   "kind": "audio",
   "call_id": "OPTIONAL-CUSTOM-CALL-ID"
 }
@@ -67,7 +67,7 @@ timeout. For calls with real audio, use [`/tts`](#tts) or
 ```json
 {
   "call_id": "00b92fd4ad13123648f76533b4939625",
-  "to": "6285117822731@s.whatsapp.net"
+  "to": "628123456789@s.whatsapp.net"
 }
 ```
 
@@ -87,7 +87,7 @@ POST /api/v1/sessions/{session_id}/calls/reject
 
 ```json
 {
-  "from": "6285117822731@s.whatsapp.net",
+  "from": "628123456789@s.whatsapp.net",
   "call_id": "00A0F769CA10E8F99EE309BDEAF4E933"
 }
 ```
@@ -113,7 +113,7 @@ POST /api/v1/sessions/{session_id}/calls/accept
 
 ```json
 {
-  "from": "6285117822731@s.whatsapp.net",
+  "from": "628123456789@s.whatsapp.net",
   "call_id": "00A0F769CA10E8F99EE309BDEAF4E933"
 }
 ```
@@ -140,7 +140,7 @@ POST /api/v1/sessions/{session_id}/calls/terminate
 
 ```json
 {
-  "peer": "6285117822731@s.whatsapp.net",
+  "peer": "628123456789@s.whatsapp.net",
   "call_id": "00b92fd4ad13123648f76533b4939625",
   "reason": "hangup"
 }
@@ -202,7 +202,7 @@ POST /api/v1/sessions/{session_id}/calls/tts
 
 ```json
 {
-  "to": "6285117822731",
+  "to": "628123456789",
   "text": "Your verification code is 4 8 2 9 1 5. I repeat, 4 8 2 9 1 5.",
   "voice": "id-ID-ArdiNeural",
   "answer_grace_ms": 6000,
@@ -228,7 +228,7 @@ the full list.
 ```json
 {
   "call_id": "9c0b12fe83aa47adbc9d1e4f6a7e0d81",
-  "to": "6285117822731@s.whatsapp.net",
+  "to": "628123456789@s.whatsapp.net",
   "recording_url": "/api/v1/sessions/main/calls/9c0b12fe83aa47adbc9d1e4f6a7e0d81/recording.wav"
 }
 ```
@@ -257,7 +257,7 @@ POST /api/v1/sessions/{session_id}/calls/play
 
 ```json
 {
-  "to": "6285117822731",
+  "to": "628123456789",
   "audio_url": "https://cdn.example.com/announcements/promo.mp3",
   "answer_grace_ms": 6000,
   "record": false
@@ -285,7 +285,7 @@ Practical notes for playing music:
 ```json
 {
   "call_id": "b3a1f7e0d2c6483b91a58f7c22e04d15",
-  "to": "6285117822731@s.whatsapp.net",
+  "to": "628123456789@s.whatsapp.net",
   "recording_url": null
 }
 ```
@@ -335,7 +335,7 @@ blob describing the audio format:
   "type": "call_started",
   "call_id": "...",
   "session_id": "main",
-  "to": "6285117822731@s.whatsapp.net",
+  "to": "628123456789@s.whatsapp.net",
   "sample_rate": 16000,
   "frame_samples": 960,
   "encoding": "pcm_s16le_mono_16khz"
@@ -361,10 +361,10 @@ An incoming call fires the `incoming_call` webhook event. Data payload:
 
 ```json
 {
-  "from": "6285117822731@s.whatsapp.net",
+  "from": "628123456789@s.whatsapp.net",
   "stanza_id": "5C1F3A2E4B6D7F8E",
   "call_id": "00A0F769CA10E8F99EE309BDEAF4E933",
-  "call_creator": "6285117822731@s.whatsapp.net",
+  "call_creator": "628123456789@s.whatsapp.net",
   "notify": "Taqin",
   "platform": "android",
   "version": "2.25.37.76",
